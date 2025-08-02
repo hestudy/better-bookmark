@@ -8,6 +8,13 @@
       "when": 1754147002284,
       "tag": "0000_brainy_skreet",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1754147305946,
+      "tag": "0001_sturdy_beast",
+      "breakpoints": true
     }
   ]
 }
