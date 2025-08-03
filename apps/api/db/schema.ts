@@ -1,5 +1,5 @@
+import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
-import { title } from "process";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -95,4 +95,62 @@ export const bookmark = sqliteTable("bookmark", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .$onUpdateFn(() => new Date()),
+});
+
+export const bookmarkRelations = relations(bookmark, ({ one, many }) => {
+  return {
+    user: one(user, {
+      fields: [bookmark.userId],
+      references: [user.id],
+    }),
+    tags: many(bookmarkTag),
+  };
+});
+
+export const tag = sqliteTable("tag", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
+});
+
+export const tagRelations = relations(tag, ({ one, many }) => {
+  return {
+    user: one(user, {
+      fields: [tag.userId],
+      references: [user.id],
+    }),
+    bookmarks: many(bookmarkTag),
+  };
+});
+
+export const bookmarkTag = sqliteTable("bookmark_tag", {
+  bookmarkId: text("bookmark_id")
+    .notNull()
+    .references(() => bookmark.id, { onDelete: "cascade" }),
+  tagId: text("tag_id")
+    .notNull()
+    .references(() => tag.id, { onDelete: "cascade" }),
+});
+
+export const bookmarkTagRelations = relations(bookmarkTag, ({ one }) => {
+  return {
+    bookmark: one(bookmark, {
+      fields: [bookmarkTag.bookmarkId],
+      references: [bookmark.id],
+    }),
+    tag: one(tag, {
+      fields: [bookmarkTag.tagId],
+      references: [tag.id],
+    }),
+  };
 });

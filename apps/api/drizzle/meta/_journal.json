@@ -57,6 +57,13 @@
       "when": 1754204283330,
       "tag": "0007_condemned_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1754224157970,
+      "tag": "0008_first_elektra",
+      "breakpoints": true
     }
   ]
 }
