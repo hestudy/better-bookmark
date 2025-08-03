@@ -1,11 +1,11 @@
 import db from "@/db/index.js";
 import { bookmark } from "@/db/schema.js";
+import { scrapyQueue } from "@/queue/index.js";
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import z from "zod";
 import app from "../../app.js";
-import { scrapyQueue } from "@/queue/index.js";
 
 const bookmarksRouter = app
   .post(
@@ -123,6 +123,43 @@ const bookmarksRouter = app
       });
 
       return c.json(result);
+    }
+  )
+  .get(
+    "/",
+    zValidator(
+      "query",
+      z.object({
+        id: z.string(),
+      })
+    ),
+    async (c) => {
+      const { id } = c.req.valid("query");
+
+      const user = c.get("user");
+      if (!user?.id) {
+        throw new HTTPException(401, { message: "Unauthorized" });
+      }
+
+      const result = await db.query.bookmark.findFirst({
+        where(fields, operators) {
+          return operators.and(
+            operators.eq(fields.id, id),
+            operators.eq(fields.userId, user!.id)
+          );
+        },
+      });
+
+      if (!result) {
+        throw new HTTPException(404, { message: "Not Found" });
+      }
+
+      return c.json({
+        ...result,
+        workStatus: result.workId
+          ? await scrapyQueue.getJobState(result.workId)
+          : null,
+      });
     }
   );
 

@@ -34,6 +34,7 @@ const worker = new Worker<{
         domain: result.domain,
         article: article?.content,
         articleText: article?.textContent,
+        workId: null,
       })
       .where(eq(bookmark.id, job.data.bookmarkId));
   },
