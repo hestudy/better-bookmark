@@ -104,6 +104,7 @@ export const bookmarkRelations = relations(bookmark, ({ one, many }) => {
       references: [user.id],
     }),
     tags: many(bookmarkTag),
+    categories: many(bookmarkCategory),
   };
 });
 
@@ -154,3 +155,54 @@ export const bookmarkTagRelations = relations(bookmarkTag, ({ one }) => {
     }),
   };
 });
+
+export const category = sqliteTable("category", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .$defaultFn(() => new Date())
+    .$onUpdateFn(() => new Date()),
+});
+
+export const categoryRelations = relations(category, ({ one, many }) => {
+  return {
+    user: one(user, {
+      fields: [category.userId],
+      references: [user.id],
+    }),
+    bookmarks: many(bookmarkCategory),
+  };
+});
+
+export const bookmarkCategory = sqliteTable("bookmark_category", {
+  bookmarkId: text("bookmark_id")
+    .notNull()
+    .references(() => bookmark.id, { onDelete: "cascade" }),
+  categoryId: text("category_id")
+    .notNull()
+    .references(() => category.id, { onDelete: "cascade" }),
+});
+
+export const bookmarkCategoryRelations = relations(
+  bookmarkCategory,
+  ({ one }) => {
+    return {
+      bookmark: one(bookmark, {
+        fields: [bookmarkCategory.bookmarkId],
+        references: [bookmark.id],
+      }),
+      category: one(category, {
+        fields: [bookmarkCategory.categoryId],
+        references: [category.id],
+      }),
+    };
+  }
+);
