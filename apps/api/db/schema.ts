@@ -1,4 +1,5 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { title } from "process";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -79,6 +80,15 @@ export const bookmark = sqliteTable("bookmark", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
+  workId: text("work_id"),
+  title: text("title"),
+  description: text("description"),
+  content: text("content"),
+  article: text("article"),
+  articleText: text("article_text"),
+  image: text("image"),
+  favicon: text("favicon"),
+  domain: text("domain"),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
     () => new Date()
   ),

@@ -1,18 +1,14 @@
-import { testLogin } from "@/lib/test.js";
-import api from "@/src/index.js";
-import { testClient } from "hono/testing";
+import { client, testLogin } from "@/lib/test.js";
 import { describe, expect, it } from "vitest";
 
 describe("bookmark", async () => {
   const login = await testLogin();
 
   it("should create a bookmark", async () => {
-    const client = testClient(api);
-
     const res = await client.bookmarks.create.$post(
       {
         json: {
-          url: "https://google.com",
+          url: "https://hono.dev",
         },
       },
       {
@@ -27,11 +23,10 @@ describe("bookmark", async () => {
   });
 
   it("should delete a bookmark", async () => {
-    const client = testClient(api);
     const createRes = await client.bookmarks.create.$post(
       {
         json: {
-          url: "https://google.com",
+          url: "https://hono.dev",
         },
       },
       {
@@ -57,5 +52,26 @@ describe("bookmark", async () => {
     const json = await res.json();
 
     expect(json).toHaveProperty("id");
+  });
+
+  it("should get bookmarks", async () => {
+    const res = await client.bookmarks.page.$post(
+      {
+        json: {
+          page: 1,
+          pageSize: 10,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${login.token}`,
+        },
+      }
+    );
+    const json = await res.json();
+
+    console.log(json);
+
+    expect(json).toBeTruthy();
   });
 });

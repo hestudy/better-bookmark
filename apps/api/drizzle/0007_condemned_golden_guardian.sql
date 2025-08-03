@@ -1,0 +1,1 @@
+ALTER TABLE `bookmark` ADD `article_text` text;
